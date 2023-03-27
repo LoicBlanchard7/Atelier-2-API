@@ -9,10 +9,9 @@ CREATE TABLE `Event` (
     `Title` varchar(128) NOT NULL,
     `description` varchar(256) NOT NULL,
     `date` datetime NOT NULL,
-    `PosX` float NOT NULL,
-    `PosY` float NOT NULL,
-    PRIMARY KEY (`uid`),
-
+    `PosX` decimal NOT NULL,
+    `PosY` decimal NOT NULL,
+    PRIMARY KEY (`eid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 DROP TABLE IF EXISTS `Comment`;
@@ -21,7 +20,5 @@ CREATE TABLE `Comment` (
     `uid` varchar(128)  NOT NULL,
     `eid` varchar(128)  NOT NULL,
     `content` varchar(256) NOT NULL,
-    PRIMARY KEY (`id`),
-    FOREIGN KEY (`uid`) REFERENCES `Account`(`uid`),
-    FOREIGN KEY (`eid`) REFERENCES `Event`(`eid`)
+    PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
