@@ -1,0 +1,124 @@
+version: "3.9"
+
+services:
+  node_event:
+    image: node:alpine
+    #command: npm start #production
+    command: npm run watch #pour le dévellopement seulement (fonctionne uniquement si Nodemon est installé)
+    #command: npm test
+    env_file:
+      #définit l'emplacement du fichier de variables d'environnement
+      - envt.env
+    working_dir: /usr/src/app
+    ports:
+      - 3333:3000 #associe le port local 3333 au port 3000 du container
+    volumes:
+      - ./app/event:/usr/src/app #synchronise le répertoire local ./app/orders avec le répertoire du container ${WORKDIR}
+    networks:
+      - reu
+    links:
+      - mariadb_event #facilite l'accès à la base de données via le network
+    depends_on:
+      #permet d'organiser le démarrage des services
+      mariadb_event:
+        condition: service_healthy #vérifie que le serveur de base de données est prêt et fonctionnel
+
+  mariadb_event:
+    image: mariadb
+    env_file:
+      #définit l'emplacement du fichier de variables d'environnement
+      - envt.env
+    volumes:
+      - ./db/event/data:/var/lib/mysql #synchronise le répertoire local ./db/data avec le répertoire du container /var/lib/mysql
+      - ./db/event/sql:/docker-entrypoint-initdb.d #initialise la base de données à l'aide des fichiers SQL présents dans le volume local ./db/sql/orders
+    ports:
+      - 3306:3306 #associe le port local 3306 au port 3306 du container
+    networks:
+      - reu
+    healthcheck:
+      #vérifie le fonctionnement du service
+      test:
+        [
+          "CMD",
+          "mysqladmin",
+          "ping",
+          "-h",
+          "localhost",
+          "-uroot",
+          "-p${MARIADB_ROOT_PASSWORD}",
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  node_auth:
+    image: node:alpine
+    command: npm run watch
+    env_file:
+      - auth.env
+    working_dir: /usr/src/app
+    ports:
+      - 3334:3000
+    volumes:
+      - ./app/auth:/usr/src/app
+    networks:
+      - reu
+    links:
+      - mariadb_auth
+    depends_on:
+      mariadb_auth:
+        condition: service_healthy
+
+  mariadb_auth:
+    image: mariadb
+    env_file:
+      - auth.env
+    volumes:
+      - ./db/auth/data:/var/lib/mysql
+      - ./db/auth/sql:/docker-entrypoint-initdb.d
+    ports:
+      - 3307:3306
+    networks:
+      - reu
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "mysqladmin",
+          "ping",
+          "-h",
+          "localhost",
+          "-uroot",
+          "-p${MARIADB_ROOT_PASSWORD}",
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  node_gateway:
+    image: node:alpine
+    command: npm run watch
+    working_dir: /usr/src/app
+    links:
+      - node_event
+      - node_auth
+    ports:
+      - 3335:3000
+    volumes:
+      - ./app/gateway:/usr/src/app
+    networks:
+      - reu
+      
+  adminer:
+    image: adminer
+    env_file:
+      - auth.env
+    ports:
+      - 8182:8080
+    networks:
+      - reu
+
+networks:
+  reu:
+    driver: bridge
+  

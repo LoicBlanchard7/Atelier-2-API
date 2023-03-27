@@ -1,0 +1,10 @@
+db/auth/data
+db/event/data
+app/event/node_modules/*
+app/event/package-lock.json
+app/auth/node_modules/*
+app/auth/package-lock.json
+app/gateway/node_modules/*
+app/gateway/package-lock.json
+envt.env
+auth.env
