@@ -11,6 +11,7 @@ CREATE TABLE `Event` (
     `date` datetime NOT NULL,
     `PosX` decimal NOT NULL,
     `PosY` decimal NOT NULL,
+    `uid` varchar(128) NOT NULL,
     PRIMARY KEY (`eid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
@@ -21,4 +22,12 @@ CREATE TABLE `Comment` (
     `eid` varchar(128)  NOT NULL,
     `content` varchar(256) NOT NULL,
     PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+DROP TABLE IF EXISTS `Participant`;
+CREATE TABLE `Participant` (
+    `uid` varchar(128)  NOT NULL,
+    `Name` varchar(128)  NOT NULL,
+    `eid` varchar(128) NOT NULL,
+    PRIMARY KEY (`uid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
