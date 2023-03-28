@@ -22,7 +22,7 @@ router
         }
     })
     .all(async (req, res, next) => {
-        res.status(405).json({ code: 405, message: error });
+        res.status(405).json({ code: 405, message: "Error" });
     });
 
 router.route('/:id')
@@ -48,7 +48,7 @@ router.route('/:id')
             if (!events) {
                 res.status(404).json({ code: 404, message: error });
             } else {
-                res.json("L'évenement avec l'id" + req.params.id + "a été supprimé.");
+                res.json("L'évenement avec l'id " + req.params.id + "a été supprimé.");
             }
         } catch (error) {
             console.error(error);
@@ -56,13 +56,14 @@ router.route('/:id')
         }
     })
     .all(async (req, res, next) => {
-        res.status(405).json({ code: 405, erreur: error });
+        res.status(405).json({ code: 405, erreur: "Error" });
     });
 
 router
-    .route("/createEvent")
-    .post(async (req, res, next) => {
+    .post("/createEvent", async (req, res, next) => {
         try {
+            console.log("Event");
+
             const { title, description, dateEvent, posX, posY } = req.body;
 
             const date = new Date(`${dateEvent.date} ${dateEvent.time}`);
@@ -116,7 +117,7 @@ router
         }
     })
     .all(async (req, res, next) => {
-        res.status(405).json({ code: 405, message: error });
+        res.status(405).json({ code: 405, message: "Error" });
     });
 
 

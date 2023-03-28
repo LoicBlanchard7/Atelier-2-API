@@ -22,6 +22,7 @@ router.post("/signup", async (req, res, next) => {
   if (!error) {
     try {
       // On vérifie que l'utilisateur n'existe pas déjà
+      
       const user = await knex("Account").where("email", value.email).first();
       // Si l'utilisateur n'existe pas, on le crée
       if (!user) {
