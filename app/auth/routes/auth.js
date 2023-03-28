@@ -19,9 +19,15 @@ router.get("/", async (req, res, next) => {
 
 //Methode get pour récupérer un utilisateur par son id
 router.get("/:id", async (req, res, next) => {
+  const schema = Joi.object({
+    uid: Joi.string().required(),
+  });
+
+  const { error, value } = schema.validate(req.params);
+
   try {
     const users = await knex("Account");
-    let user = users.find((element) => element.uid == req.params.id);
+    let user = users.find((element) => element.uid == value.uid);
     res.json({ user });
   } catch (error) {
     res.sendStatus(500);
@@ -236,6 +242,15 @@ router.all("/validate", async (req, res, next) => {
     message: "Requête non authorisée",
   });
 });
+
+router.all("/", async (req, res, next) => {
+  res.status(405).json({
+    type: "error",
+    error: 405,
+    message: "Requête non authorisée",
+  });
+});
+
 
 // Vérifie que l'access token est valide
 function verifyToken(bearer) {

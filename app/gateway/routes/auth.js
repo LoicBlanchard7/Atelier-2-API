@@ -56,4 +56,20 @@ router.post("/signin", async (req, res, next) => {
   }
 });
 
+router.all("/signup", async (req, res, next) => {
+  res.status(405).json({
+    type: "error",
+    error: 405,
+    message: "Requête non authorisée",
+  });
+});
+
+router.all("/signin", async (req, res, next) => {
+  res.status(405).json({
+    type: "error",
+    error: 405,
+    message: "Requête non authorisée",
+  });
+});
+
 module.exports = router;
