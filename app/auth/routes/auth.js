@@ -33,9 +33,11 @@ router.post("/signup", async (req, res, next) => {
             name: value.name,
             email: value.email,
             password: await bcrypt.hash(value.password, 10),
+            created_at: new Date(),
+            updated_at: new Date()
           })
           .into("Account");
-
+        console.log("ici4");
         
         // On retourne un message de succès
         res.status(201).json({
@@ -68,15 +70,13 @@ router.post("/signin", async (req, res, next) => {
     email: Joi.string().email().required(),
     password: Joi.string().min(8).required(),
   });
-
   const { error, value } = schema.validate(req.body);
 
   // Si aucune erreur de validation du body, on continue
   if (!error) {
     try {
       // On récupère le mot de passe hashé de l'utilisateur
-      const user = await knex("clients").where("email", value.email).first();
-
+      const user = await knex("Account").where("email", value.email).first();
       // On vérifie que l'utilisateur existe
       if (user) {
         // On compare le mot de passe entré avec le mot de passe hashé
@@ -88,8 +88,8 @@ router.post("/signin", async (req, res, next) => {
         // Si le mot de passe est correct
         if (validPassword) {
           // On génère les tokens
-          const tokens = await generateTokens(user.id);
-
+          const tokens = await generateTokens(user.uid);
+          console.log(tokens);
           // On retourne les tokens
           res.status(200).json({
             access_token: tokens.access_token,
@@ -135,7 +135,7 @@ router.post("/refreshToken", async (req, res, next) => {
       // On récupère l'access token
       const decode = verifyToken(req.headers["authorization"]);
       // On récupère ce token dans la base de données
-      const refreshToken = await knex("clients")
+      const refreshToken = await knex("Account")
         .select("refresh_token")
         .where("refresh_token", value.refresh_token)
         .first();
@@ -143,7 +143,7 @@ router.post("/refreshToken", async (req, res, next) => {
       // Si le token existe dans la base de données
       if (refreshToken) {
         // On génère un nouveau couple de token
-        const tokens = generateTokens(decode.id);
+        const tokens = generateTokens(decode.uid);
 
         // On retourne les nouveaux tokens
         res.status(200).json({
@@ -241,11 +241,11 @@ function verifyToken(bearer) {
 }
 
 // Genère l'access token et le refresh token en prenant l'utilisateur en paramètre
-async function generateTokens(id) {
+async function generateTokens(uid) {
   // Génération de l'access token
   const token = await jwt.sign(
     {
-      id: id,
+      uid: uid,
     },
     process.env.ACCESS_TOKEN_SECRET,
     {
@@ -255,7 +255,7 @@ async function generateTokens(id) {
 
   // Génération du refresh token
   const refreshToken = await randToken.generate(30);
-  await knex("clients").where("id", id).update({
+  await knex("Account").where("uid", uid).update({
     refresh_token: refreshToken,
   });
 
