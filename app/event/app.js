@@ -5,6 +5,7 @@ const logger = require("morgan");
 
 const indexRouter = require("./routes/index");
 const eventRouter = require("./routes/event");
+const partRouter = require("./routes/participants");
 
 let app = express();
 
@@ -16,6 +17,7 @@ app.use(express.static(path.join(__dirname, "public")));
 
 app.use("/", indexRouter);
 app.use("/event", eventRouter);
+app.use("/participants", partRouter);
 
 
 app.use("*", (req, res) => {

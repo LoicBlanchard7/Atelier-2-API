@@ -29,5 +29,6 @@ CREATE TABLE `Participant` (
     `uid` varchar(128)  NOT NULL,
     `Name` varchar(128)  NOT NULL,
     `eid` varchar(128) NOT NULL,
+    `status` varchar(128) NOT NULL,
     PRIMARY KEY (`uid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;

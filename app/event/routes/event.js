@@ -10,11 +10,7 @@ router
         try {
             const events = await knex('Event');
 
-            if (!events) {
-                res.status(404).json({ code: 404, message: error });
-            } else {
-                res.json({ events });
-            }
+            res.json({ events });
 
         } catch (error) {
             res.status(500).json({ code: 500, message: error });
@@ -26,12 +22,7 @@ router.route('/:id')
         try {
             const events = await knex('Event');
             let event = events.find(element => element.eid == req.params.id);
-
-            if (!events) {
-                res.status(404).json({ code: 404, message: error });
-            } else {
-                res.json({ event });
-            }
+            res.json({ event });
         } catch (error) {
             next(error);
         }
@@ -91,6 +82,16 @@ router.post("/createEvent",async (req, res, next) => {
         }
     });
 
+router.all("/", (req, res, next) => {
+    res.status(405).json({ code: 405, message: "Method not allowed" });
+});
 
+router.all("/createEvent", (req, res, next) => {
+    res.status(405).json({ code: 405, message: "Method not allowed" });
+}); 
+
+router.all("*", (req, res, next) => {
+    res.status(404).json({ code: 404, message: "Not found" });
+});
 
 module.exports = router;
