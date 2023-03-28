@@ -17,16 +17,14 @@ router.post("/signup", async (req, res, next) => {
   });
 
   const { error, value } = schema.validate(req.body);
-  console.log("ici");
+
   // Si aucune erreur de validation du body, on continue
   if (!error) {
     try {
       // On vérifie que l'utilisateur n'existe pas déjà
       const user = await knex("Account").where("email", value.email).first();
-      console.log("ici2");
       // Si l'utilisateur n'existe pas, on le crée
       if (!user) {
-        console.log("ici3");
         await knex
           .insert({
             uid: uuidv4(),
@@ -37,7 +35,6 @@ router.post("/signup", async (req, res, next) => {
             updated_at: new Date()
           })
           .into("Account");
-        console.log("ici4");
         
         // On retourne un message de succès
         res.status(201).json({
@@ -79,18 +76,19 @@ router.post("/signin", async (req, res, next) => {
       const user = await knex("Account").where("email", value.email).first();
       // On vérifie que l'utilisateur existe
       if (user) {
-        // On compare le mot de passe entré avec le mot de passe hashé
+    // On compare le mot de passe entré avec le mot de passe hashé
         const validPassword = await bcrypt.compare(
           value.password,
           user.password
         );
 
+      
         // Si le mot de passe est correct
         if (validPassword) {
           // On génère les tokens
           const tokens = await generateTokens(user.uid);
-          console.log(tokens);
           // On retourne les tokens
+       
           res.status(200).json({
             access_token: tokens.access_token,
             refresh_token: tokens.refresh_token,
@@ -143,7 +141,7 @@ router.post("/refreshToken", async (req, res, next) => {
       // Si le token existe dans la base de données
       if (refreshToken) {
         // On génère un nouveau couple de token
-        const tokens = generateTokens(decode.uid);
+        const tokens = await generateTokens(decode.uid);
 
         // On retourne les nouveaux tokens
         res.status(200).json({
@@ -173,7 +171,6 @@ router.get("/validate", (req, res) => {
   try {
     //On appelle la metode verifyToken pour vérifier le token en lui passant en parametre le header autorization
     const decode = verifyToken(req.headers["authorization"]);
-    console.log(decode);
     //  Si le token est valide on renvoie un status 200 avec le login a true et les données du token
     res.status(200).json({
       login: true,
@@ -258,6 +255,7 @@ async function generateTokens(uid) {
   await knex("Account").where("uid", uid).update({
     refresh_token: refreshToken,
   });
+
 
   // Retourne les tokens
   return {
