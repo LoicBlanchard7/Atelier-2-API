@@ -7,6 +7,26 @@ const bcrypt = require("bcrypt");
 const randToken = require("rand-token");
 const { v4: uuidv4 } = require("uuid");
 
+//Méthode get pour récupérer un utilisateur
+router.get("/", async (req, res, next) => {
+  try {
+    const users = await knex("Account");
+    res.json({ users });
+  } catch (error) {
+    res.sendStatus(500);
+  }
+});
+
+//Methode get pour récupérer un utilisateur par son id
+router.get("/:id", async (req, res, next) => {
+  try {
+    const users = await knex("Account");
+    let user = users.find((element) => element.uid == req.params.id);
+    res.json({ user });
+  } catch (error) {
+    res.sendStatus(500);
+  }
+}); 
 // Méthode POST pour créer un utilisateur
 router.post("/signup", async (req, res, next) => {
   // On vérifie que le body contient bien un nom, un email et un mot de passe
