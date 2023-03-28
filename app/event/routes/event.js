@@ -20,9 +20,6 @@ router
             console.log(error);
             res.status(500).json({ code: 500, message: error });
         }
-    })
-    .all(async (req, res, next) => {
-        res.status(405).json({ code: 405, message: error });
     });
 
 router.route('/:id')
@@ -54,69 +51,51 @@ router.route('/:id')
             console.error(error);
             next(error);
         }
-    })
-    .all(async (req, res, next) => {
-        res.status(405).json({ code: 405, erreur: error });
     });
+//
+router.post("/createEvent",async (req, res, next) => {
+        const schema = Joi.object({
+            title: Joi.string().required(),
+            description: Joi.string().required(),
+            date: Joi.string().required(),
+            posX: Joi.number().required(),
+            posY: Joi.number().required(),
+        });
 
-router
-    .route("/createEvent")
-    .post(async (req, res, next) => {
-        try {
-            const { title, description, dateEvent, posX, posY } = req.body;
+        console.log(req.body);
+        
 
-            const date = new Date(`${dateEvent.date} ${dateEvent.time}`);
+        const { error, value } = schema.validate(req.body);
 
-            const schema = Joi.object({
-                title: Joi.string().required(),
-                description: Joi.string().required(),
-                date: Joi.date().required(),
-                posX: Joi.number().required(),
-                posY: Joi.number().required(),
-            });
-
-            const { error, value } = schema.validate({
-                title: title,
-                description: description,
-                date: date,
-                posX: posX,
-                posY: posY,
-            });
-
-            if (error) {
-                res
-                    .status(404)
-                    .json({ code: 404, message: error });
-                return;
+        console.log(value);
+        if (!error) {
+            try{
+                await knex
+                .insert({
+                    eid: uuidv4(),
+                    Title: value.title,
+                    description: value.description,
+                    date: new Date(value.date),
+                    PosX: value.posX,
+                    PosY: value.posY,
+                    //A changé en fonction de l'utilisateur connecté
+                    uid: uuidv4()
+                })
+                .into("Event");
+                // On retourne un message de succès
+                res.status(201).json({
+                    type: "success",
+                    error: null,
+                    message: "Evènement créé",
+                });
+            }catch(err){
+                // Si une erreur est survenue lors de l'execution, on renvoie une erreur 500
+                res.sendStatus(500); 
             }
-
-            const newID = uuidv4();
-
-            const event = await knex("Event").insert({
-                eid: newID,
-                Title: title,
-                description: description,
-                date: date,
-                PosX: posX,
-                PosY: posY,
-            });
-
-            const toReturn = {
-                eid: newID,
-                Title: title,
-                description: description,
-                date: date,
-                PosX: posX,
-                PosY: posY,
-            };
-
-            res.json({ event: toReturn });
-        } catch (error) {
-            res.status(500).json({ code: 500, message: error });
+        }else{
+            // Si une erreur de validation du body est survenue, on renvoie une erreur 400
+            res.sendStatus(400);
         }
-    })
-    .all(async (req, res, next) => {
-        res.status(405).json({ code: 405, message: error });
     });
 
 

@@ -9,8 +9,8 @@ CREATE TABLE `Event` (
     `Title` varchar(128) NOT NULL,
     `description` varchar(256) NOT NULL,
     `date` datetime NOT NULL,
-    `PosX` decimal NOT NULL,
-    `PosY` decimal NOT NULL,
+    `PosX` decimal(15,10) NOT NULL,
+    `PosY` decimal(15,10) NOT NULL,
     `uid` varchar(128) NOT NULL,
     PRIMARY KEY (`eid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
