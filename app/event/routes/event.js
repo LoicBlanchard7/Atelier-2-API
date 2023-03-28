@@ -17,7 +17,6 @@ router
             }
 
         } catch (error) {
-            console.log(error);
             res.status(500).json({ code: 500, message: error });
         }
     });
@@ -34,7 +33,6 @@ router.route('/:id')
                 res.json({ event });
             }
         } catch (error) {
-            console.error(error);
             next(error);
         }
     })
@@ -45,10 +43,9 @@ router.route('/:id')
             if (!events) {
                 res.status(404).json({ code: 404, message: error });
             } else {
-                res.json("L'évenement avec l'id" + req.params.id + "a été supprimé.");
+                res.json("L'évenement avec l'id " + req.params.id + " a été supprimé.");
             }
         } catch (error) {
-            console.error(error);
             next(error);
         }
     });
@@ -62,12 +59,8 @@ router.post("/createEvent",async (req, res, next) => {
             posY: Joi.number().required(),
         });
 
-        console.log(req.body);
-        
-
         const { error, value } = schema.validate(req.body);
 
-        console.log(value);
         if (!error) {
             try{
                 await knex
