@@ -23,7 +23,11 @@ router.post("/signup", async (req, res, next) => {
 
       res.json(user.data);
     } catch (err) {
-      res.sendStatus(err.response.status);
+       if(!error.response){
+          res.sendStatus(500);
+        }else{
+            res.sendStatus(error.response.status);
+        }
     }
   } else {
     res.sendStatus(400);
@@ -49,7 +53,11 @@ router.post("/signin", async (req, res, next) => {
         res.json(user.data);
      
     } catch (err) {
-        res.sendStatus(err.response.status);
+         if(!error.response){
+            res.sendStatus(500);
+          }else{
+            res.sendStatus(error.response.status);
+          }
     }
   } else {
     res.sendStatus(400);

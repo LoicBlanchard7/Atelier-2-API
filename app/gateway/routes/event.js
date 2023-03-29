@@ -3,26 +3,35 @@ const router = express.Router();
 const axios = require("axios");
 const Joi = require("joi");
 
-router
-    .get("/", async (req, res, next) => {
+router.get("/", async (req, res, next) => {
         try {
-            const authorization = req.headers.authorization.split(" ")[1];
-            await axios
-                .get(`http://node_auth:3000/auth/validate`, {
+            if(!req.headers["authorization"]){
+                return res.sendStatus(401);
+            }
+            const authorization = req.headers["authorization"].split(" ")[1];
+            console.log("ici1");
+            await axios.get(`http://node_auth:3000/auth/validate`, {
                     headers: { Authorization: `Bearer ${authorization}` },
                 })
-
+            console.log("ici2");
             let link = "http://node_event:3000" + req.originalUrl;
             const response = await axios.get(link)
             res.json(response.data);
         } catch (error) {
-            res.sendStatus(error.response.status);
+            if(!error.response){
+                res.sendStatus(500);
+            }else{
+                res.sendStatus(error.response.status);
+            }
         }
     });
 
 router.get("/:id", async (req, res, next) => {
     try {
-        const authorization = req.headers.authorization.split(" ")[1];
+        if(!req.headers["authorization"]){
+                return res.sendStatus(401);
+        }
+        const authorization = req.headers["authorization"].split(" ")[1];
         await axios
             .get(`http://node_auth:3000/auth/validate`, {
                 headers: { Authorization: `Bearer ${authorization}` },
@@ -32,23 +41,35 @@ router.get("/:id", async (req, res, next) => {
         const response = await axios.get(link)
         res.json(response.data);
     } catch (error) {
-        res.sendStatus(error.response.status);
+        if(!error.response){
+                res.sendStatus(500);
+            }else{
+                res.sendStatus(error.response.status);
+            }
     }
 });
 
 router.delete("/:id", async (req, res, next) => {
     try {
-        const authorization = req.headers.authorization.split(" ")[1];
+        if(!req.headers["authorization"]){
+            return res.sendStatus(401);
+        }
+        const authorization = req.headers["authorization"].split(" ")[1];
         await axios
             .get(`http://node_auth:3000/auth/validate`, {
                 headers: { Authorization: `Bearer ${authorization}` },
             })
 
         let link = "http://node_event:3000" + req.originalUrl;
+        console.log(link);
         const response = await axios.delete(link)
         res.json(response.data);
     } catch (error) {
-        res.sendStatus(error.response.status);
+         if(!error.response){
+                res.sendStatus(500);
+            }else{
+                res.sendStatus(error.response.status);
+            }
     }
 });
 
@@ -65,9 +86,12 @@ router.post("/createEvent", async (req, res, next) => {
 
     if (!error) {
         try {
-            const authorization = req.headers.authorization.split(" ")[1];
-            await axios
-                .get(`http://node_auth:3000/auth/validate`, {
+            if(!req.headers["authorization"]){
+                console.log(req.headers["authorization"]);
+                return res.sendStatus(401);
+            }
+            const authorization = req.headers["authorization"].split(" ")[1];
+            const userid = await axios.get(`http://node_auth:3000/auth/validate`, {
                     headers: { Authorization: `Bearer ${authorization}` },
                 })
 
@@ -79,6 +103,7 @@ router.post("/createEvent", async (req, res, next) => {
                 date: value.date,
                 posX: value.posX,
                 posY: value.posY,
+                uid: userid.data.uid,
             })
             res.json(response.data);
         } catch (err) {
