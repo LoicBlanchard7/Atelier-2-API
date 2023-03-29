@@ -4,43 +4,51 @@ const knex = require("../db_connection");
 const Joi = require("joi");
 const { v4: uuidv4 } = require("uuid");
 
-router
-    .route("/")
-    .get(async (req, res, next) => {
-        try {
-            const events = await knex('Event');
+router.get("/", async (req, res, next) => {
+    try {
+        const events = await knex('Event');
+        res.json({ events });
+    } catch (error) {
+       res.sendStatus(500);
+    }
+});
 
+router.get("/:id", async (req, res, next) => {
+    const schema = Joi.object({
+        eid: Joi.string().required(),
+    });
+    const { error, value } = schema.validate(req.params);
+    if(!error){
+        try {
+            const events = await knex('Event').where('eid', value.eid);
             res.json({ events });
-
         } catch (error) {
-            res.status(500).json({ code: 500, message: error });
+            res.sendStatus(500);
         }
+    }else{
+        res.sendStatus(400);
+    }
+});
+
+router.delete("/:id", async (req, res, next) => {
+    const schema = Joi.object({
+        eid: Joi.string().required(),
     });
-
-router.route('/:id')
-    .get(async (req, res, next) => {
+    const { error, value } = schema.validate(req.params);
+    console.log(value);
+    console.log(error);
+    if(!error){
         try {
-            const events = await knex('Event');
-            let event = events.find(element => element.eid == req.params.id);
-            res.json({ event });
-        } catch (error) {
-            next(error);
+            await knex('Event').where('eid', value.eid).del();
+            res.sendStatus(200);
+        } catch (error) {   
+            res.sendStatus(500);
         }
-    })
-    .delete(async (req, res, next) => {
-        try {
-            const events = await knex('Event').delete().where({ eid: req.params.id });
+    }else{
+        res.sendStatus(400);    
+    }
+});
 
-            if (!events) {
-                res.status(404).json({ code: 404, message: error });
-            } else {
-                res.json("L'évenement avec l'id " + req.params.id + " a été supprimé.");
-            }
-        } catch (error) {
-            next(error);
-        }
-    });
-//
 router.post("/createEvent",async (req, res, next) => {
         const schema = Joi.object({
             title: Joi.string().required(),
@@ -48,6 +56,7 @@ router.post("/createEvent",async (req, res, next) => {
             date: Joi.string().required(),
             posX: Joi.number().required(),
             posY: Joi.number().required(),
+            uid: Joi.string().required(),
         });
 
         const { error, value } = schema.validate(req.body);
@@ -63,7 +72,7 @@ router.post("/createEvent",async (req, res, next) => {
                     PosX: value.posX,
                     PosY: value.posY,
                     //A changé en fonction de l'utilisateur connecté
-                    uid: uuidv4()
+                    uid: value.uid,
                 })
                 .into("Event");
                 // On retourne un message de succès
