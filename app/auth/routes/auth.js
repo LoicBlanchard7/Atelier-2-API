@@ -18,7 +18,7 @@ router.get("/", async (req, res, next) => {
 });
 
 //Methode get pour récupérer un utilisateur par son id
-router.get("/:id", async (req, res, next) => {
+router.get("/userId/:id", async (req, res, next) => {
   const schema = Joi.object({
     uid: Joi.string().required(),
   });
@@ -116,7 +116,7 @@ router.post("/signin", async (req, res, next) => {
           // On retourne les tokens
        
           res.status(200).json({
-            uid: user.uid,
+            uid: user.uid, 
             access_token: tokens.access_token,
             refresh_token: tokens.refresh_token,
           });
@@ -196,6 +196,7 @@ router.post("/refreshToken", async (req, res, next) => {
 // Methode GET pour vérifier si le token est valide
 router.get("/validate", (req, res) => {
   try {
+    console.log("in route");
     //On appelle la metode verifyToken pour vérifier le token en lui passant en parametre le header autorization
     const decode = verifyToken(req.headers["authorization"]);
     //  Si le token est valide on renvoie un status 200 avec le login a true et les données du token
