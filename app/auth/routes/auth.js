@@ -51,9 +51,10 @@ router.post("/signup", async (req, res, next) => {
       const user = await knex("Account").where("email", value.email).first();
       // Si l'utilisateur n'existe pas, on le crée
       if (!user) {
+        let uid = uuidv4()
         await knex
           .insert({
-            uid: uuidv4(),
+            uid: uid,
             name: value.name,
             email: value.email,
             password: await bcrypt.hash(value.password, 10),
@@ -65,7 +66,6 @@ router.post("/signup", async (req, res, next) => {
         // On retourne un message de succès
         res.status(201).json({
           type: "success",
-          error: null,
           message: "Utilisateur créé",
         });
       } else {
@@ -116,6 +116,7 @@ router.post("/signin", async (req, res, next) => {
           // On retourne les tokens
        
           res.status(200).json({
+            uid: user.uid,
             access_token: tokens.access_token,
             refresh_token: tokens.refresh_token,
           });
