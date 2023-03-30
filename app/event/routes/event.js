@@ -13,14 +13,14 @@ router.get("/", async (req, res, next) => {
     }
 });
 
-router.get("/:id", async (req, res, next) => {
+router.get("/getEvent/:id", async (req, res, next) => {
     const schema = Joi.object({
-        eid: Joi.string().required(),
+        id: Joi.string().required(),
     });
     const { error, value } = schema.validate(req.params);
     if(!error){
         try {
-            const events = await knex('Event').where('eid', value.eid);
+            const events = await knex('Event').where('eid', value.id);
             res.json({ events });
         } catch (error) {
             res.sendStatus(500);
@@ -30,7 +30,7 @@ router.get("/:id", async (req, res, next) => {
     }
 });
 
-router.delete("/:id", async (req, res, next) => {
+router.delete("/deleteEvent/:id", async (req, res, next) => {
     const schema = Joi.object({
         eid: Joi.string().required(),
     });
@@ -90,6 +90,25 @@ router.post("/createEvent",async (req, res, next) => {
             res.sendStatus(400);
         }
     });
+
+router.get("/getEventByUser/:uid", async (req, res, next) => {
+    const schema = Joi.object({
+        uid: Joi.string().required(),
+    });
+    const { error, value } = schema.validate(req.params);
+    if(!error){
+        try {
+            const events = await knex('Event').where('uid', value.uid);
+            res.json({ events });
+        } catch (error) {
+            res.sendStatus(500);
+        }
+    }else{
+        res.sendStatus(400);
+    }
+});
+
+
 
 router.all("/", (req, res, next) => {
     res.status(405).json({ code: 405, message: "Method not allowed" });

@@ -8,6 +8,7 @@ const Joi = require("joi");
 router.post("/signup", async (req, res, next) => {
   const schema = Joi.object({
     name: Joi.string().min(1).max(50).required(),
+    firstname: Joi.string().min(1).max(50).required(),
     email: Joi.string().email().required(),
     password: Joi.string().min(8).required(),
   });
@@ -17,16 +18,17 @@ router.post("/signup", async (req, res, next) => {
     try {
       const user = await axios.post("http://node_auth:3000/auth/signup", {
         name: value.name,
+        firstname: value.firstname,
         email: value.email,
         password: value.password,
       });
 
       res.json(user.data);
     } catch (err) {
-       if(!error.response){
+       if(!err.response){
           res.sendStatus(500);
         }else{
-            res.sendStatus(error.response.status);
+            res.sendStatus(err.response.status);
         }
     }
   } else {
@@ -53,10 +55,10 @@ router.post("/signin", async (req, res, next) => {
         res.json(user.data);
      
     } catch (err) {
-         if(!error.response){
+         if(!err.response){
             res.sendStatus(500);
           }else{
-            res.sendStatus(error.response.status);
+            res.sendStatus(err.response.status);
           }
     }
   } else {

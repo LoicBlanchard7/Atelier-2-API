@@ -9,6 +9,7 @@ DROP TABLE IF EXISTS `Account`;
 CREATE TABLE `Account` (
   `uid` varchar(128) NOT NULL,
   `name` varchar(128) NOT NULL,
+  `firstname` varchar(128) NOT NULL,
   `email` varchar(128) NOT NULL,
   `password` varchar(256) NOT NULL,
   `refresh_token` varchar(256) DEFAULT NULL,

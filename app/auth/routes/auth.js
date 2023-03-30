@@ -38,6 +38,7 @@ router.post("/signup", async (req, res, next) => {
   // On vérifie que le body contient bien un nom, un email et un mot de passe
   const schema = Joi.object({
     name: Joi.string().min(1).max(50).required(),
+    firstname: Joi.string().min(1).max(50).required(),
     email: Joi.string().email().required(),
     password: Joi.string().min(8).required(),
   });
@@ -56,6 +57,7 @@ router.post("/signup", async (req, res, next) => {
           .insert({
             uid: uid,
             name: value.name,
+            firstname: value.firstname,
             email: value.email,
             password: await bcrypt.hash(value.password, 10),
             created_at: new Date(),

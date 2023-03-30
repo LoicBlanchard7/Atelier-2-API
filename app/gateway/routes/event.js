@@ -26,7 +26,7 @@ router.get("/", async (req, res, next) => {
         }
     });
 
-router.get("/:id", async (req, res, next) => {
+router.get("/getEvent/:id", async (req, res, next) => {
     try {
         if(!req.headers["authorization"]){
                 return res.sendStatus(401);
@@ -49,7 +49,7 @@ router.get("/:id", async (req, res, next) => {
     }
 });
 
-router.delete("/:id", async (req, res, next) => {
+router.delete("/deleteEvent/:id", async (req, res, next) => {
     try {
         if(!req.headers["authorization"]){
             return res.sendStatus(401);
@@ -80,10 +80,9 @@ router.post("/createEvent", async (req, res, next) => {
         date: Joi.string().required(),
         posX: Joi.number().required(),
         posY: Joi.number().required(),
+        uid: Joi.string().required(),   
     });
-
     const { error, value } = schema.validate(req.body);
-
     if (!error) {
         try {
             if(!req.headers["authorization"]){
@@ -103,18 +102,48 @@ router.post("/createEvent", async (req, res, next) => {
                 date: value.date,
                 posX: value.posX,
                 posY: value.posY,
-                uid: userid.data.uid,
+                uid: value.uid,
             })
             res.json(response.data);
         } catch (err) {
             // Si une erreur est survenue lors de l'execution, on renvoie une erreur 500
-            res.sendStatus(400);
+             if(!err.response){
+                res.sendStatus(500);
+            }else{
+                res.sendStatus(err.response.status);
+            }
         }
     } else {
         // Si une erreur de validation du body est survenue, on renvoie une erreur 400
         res.sendStatus(400);
     }
 });
+
+//router pour récupérer les événements crée par un utilisateur
+router.get("/getEventByUser/:uid", async (req, res, next) => {  
+    try {
+        if(!req.headers["authorization"]){
+            return res.sendStatus(401);
+        }
+        const authorization = req.headers["authorization"].split(" ")[1];
+        await axios
+            .get(`http://node_auth:3000/auth/validate`, {
+                headers: { Authorization: `Bearer ${authorization}` },
+            })
+
+
+        let link = "http://node_event:3000" + req.originalUrl;
+        const response = await axios.get(link)
+        res.json(response.data);
+    } catch (error) {
+        if(!error.response){
+                res.sendStatus(500);
+            }else{
+                res.sendStatus(error.response.status);
+            }
+    }
+});
+
 
 router.all("/createEvent", async (req, res, next) => {
     res.status(405).json({

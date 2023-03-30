@@ -57,12 +57,16 @@ router.get("/user/:uid", async (req, res, next) => {
         if(!error){
         try {
             const participants = await knex("Participant").where({ uid: value.uid });
-
-            let results = [];
+            let events = [];
             for (let i = 0; i < participants.length; i++) {
-                results.push(participants[i].eid);
+                const event = await knex("Event").where({ eid: participants[i].eid });
+                let eventObj = {
+                    "event" : event,
+                    "status": participants[i].status
+                }
+                events.push(eventObj);
             }
-            res.json({ results });
+            res.json({ events });
         } catch (error) {
             res.status(500).json({ code: 500, message: error });
         }
@@ -77,24 +81,31 @@ router.post("/add", async (req, res, next) => {
         uid: Joi.string().required(),
         eid: Joi.string().required(),
         name: Joi.string().required(),
+        firstname: Joi.string().required(),
     });
 
     const { error , value } = schema.validate(req.body);
-
     if(!error){
-    try {
-        const participants = await knex("Participant").insert({ uid: value.uid, eid: value.eid, name: value.name, status: "pending"  });
-        res.json({ participants });
-    } catch (error) {
-        res.status(500).json({ code: 500, message: error });
-    }
+        try {
+            const partExist = await knex("Participant").where({ uid: value.uid, eid: value.eid });
+
+            const partAndEvenetExist = partExist.find(element => element.eid === value.eid);
+            if(partAndEvenetExist ){
+                res.status(409).json({ code: 409, message: "Participant already exists" });
+            }else{  
+                const participants = await knex("Participant").insert({ uid: value.uid, eid: value.eid, name: value.name,firstname:value.firstname, status: "pending"  });
+                res.json({ participants });
+            }
+        } catch (error) {
+            res.status(500).json({ code: 500, message: error });
+        }
     }else{
         res.status(400).json({ code: 400, message: error });
     }
 });
 
 //Route pour qu'un participant accepte un événement
-router.patch("/accept", async (req, res, next) => {
+router.put("/accept", async (req, res, next) => {
     const schema = Joi.object({
         uid: Joi.string().required(),
         eid: Joi.string().required(),
@@ -105,7 +116,7 @@ router.patch("/accept", async (req, res, next) => {
 
     if(!error){
     try {
-        const participants = await knex("Participant").update({ status: "accepted" }).where({ uid: value.uid, eid: value.eid , status: value.status });
+        const participants = await knex("Participant").update({ status: value.status}).where({ uid: value.uid, eid: value.eid});
         res.json({ participants });
     } catch (error) {
         res.status(500).json({ code: 500, message: error });
@@ -114,5 +125,49 @@ router.patch("/accept", async (req, res, next) => {
         res.status(400).json({ code: 400, message: error });
     }
 });
+
+router.post("/comment/add", async (req, res, next) => {
+    const schema = Joi.object({
+        uid : Joi.string().required(),
+        eid: Joi.string().required(),
+        content : Joi.string().required(),
+    });
+
+    const { error , value } = schema.validate(req.body);   
+
+    if(!error){
+        try {
+            const comments = await knex("Comment").insert({ uid: value.uid, eid: value.eid, content: value.content });
+            res.json({ comments });
+        } catch (error) {   
+            res.status(500).json({ code: 500, message: error });
+        }
+    }else{
+        res.status(400).json({ code: 400, message: error });
+    }
+}); 
+
+router.get("/comment/:eid", async (req, res, next) => {
+    const schema = Joi.object({
+        eid: Joi.string().required(),
+    });
+
+    const { error , value } = schema.validate(req.params);
+
+    if(!error){
+        try {
+            const comments = await knex("Comment").where({ eid: value.eid });
+            res.json({ comments });
+        } catch (error) {
+            res.status(500).json({ code: 500, message: error });
+        }
+    }else{
+        res.status(400).json({ code: 400, message: error });
+    }
+});
+
+
+
+//
 
 module.exports = router;

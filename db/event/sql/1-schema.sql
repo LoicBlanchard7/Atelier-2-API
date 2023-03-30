@@ -18,7 +18,7 @@ CREATE TABLE `Event` (
 DROP TABLE IF EXISTS `Comment`;
 CREATE TABLE `Comment` (
     `id` int(11) NOT NULL AUTO_INCREMENT,
-    `uid` varchar(128)  NOT NULL,
+    `uid` varchar(128) NOT NULL,	
     `eid` varchar(128)  NOT NULL,
     `content` varchar(256) NOT NULL,
     PRIMARY KEY (`id`)
@@ -28,7 +28,9 @@ DROP TABLE IF EXISTS `Participant`;
 CREATE TABLE `Participant` (
     `uid` varchar(128)  NOT NULL,
     `Name` varchar(128)  NOT NULL,
+    `FirstName` varchar(128)  NOT NULL,
     `eid` varchar(128) NOT NULL,
     `status` varchar(128) NOT NULL,
-    PRIMARY KEY (`uid`)
+    PRIMARY KEY (`uid`,`eid`),
+    FOREIGN KEY (`eid`) REFERENCES `Event`(`eid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
