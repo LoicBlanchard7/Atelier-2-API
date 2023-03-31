@@ -129,6 +129,8 @@ router.put("/accept", async (req, res, next) => {
 router.post("/comment/add", async (req, res, next) => {
     const schema = Joi.object({
         uid : Joi.string().required(),
+        name : Joi.string().required(),
+        firstname : Joi.string().required(),
         eid: Joi.string().required(),
         content : Joi.string().required(),
     });
@@ -137,7 +139,7 @@ router.post("/comment/add", async (req, res, next) => {
 
     if(!error){
         try {
-            const comments = await knex("Comment").insert({ uid: value.uid, eid: value.eid, content: value.content });
+            const comments = await knex("Comment").insert({ uid: value.uid, eid: value.eid, content: value.content, name: value.name, firstname: value.firstname });
             res.json({ comments });
         } catch (error) {   
             res.status(500).json({ code: 500, message: error });

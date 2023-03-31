@@ -30,21 +30,22 @@ router.get("/user/:id", async (req, res, next) => {
 
             if( response.data.events.length == 0){
                 res.json(resTab);
-            }
-            for(let i = 0; i < response.data.events.length; i++){
-                let event = response.data.events[i].event;
-                console.log(event);
-                let creator = await axios.get("http://node_auth:3000/auth/userId/" + event.uid);
-                console.log(response.data.events[i].status);
+            }else{
+                for(let i = 0; i < response.data.events.length; i++){
+                    let event = response.data.events[i].event;
+                    console.log(event);
+                    let creator = await axios.get("http://node_auth:3000/auth/userId/" + event.uid);
+                    console.log(response.data.events[i].status);
 
-                resTab.push({
-                    event : event,
-                    status : response.data.events[i].status,
-                    creator : creator.data.user.name + " " + creator.data.user.firstname
-                })
+                    resTab.push({
+                        event : event,
+                        status : response.data.events[i].status,
+                        creator : creator.data.user.name + " " + creator.data.user.firstname
+                    })
+                }
+                console.log("ici");
+                res.json(resTab);
             }
-            console.log("ici");
-            res.json(resTab);
         }
         catch (error) {
              if(!error.response){
@@ -174,16 +175,19 @@ router.put("/accept", async (req, res, next) => {
 router.post("/comment/add", async (req, res, next) => {
     const schema = Joi.object({
         uid: Joi.string().required(),
+        name: Joi.string().required(),
+        firstname: Joi.string().required(),
         eid: Joi.string().required(),
         content: Joi.string().required(),
     });
+
 
     const { error, value } = schema.validate(req.body); 
 
     if(!error){
         try {
             let link = "http://node_event:3000" + req.originalUrl;
-            const response = await axios.post(link ,{ uid: value.uid, eid: value.eid, content: value.content});
+            const response = await axios.post(link ,{ uid: value.uid, eid: value.eid, content: value.content, name: value.name, firstname: value.firstname});
             res.json(response.data);
         }
         catch (error) {

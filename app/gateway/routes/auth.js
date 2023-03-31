@@ -79,6 +79,27 @@ router.get("/userId/:id",async (req, res, next) =>{
   }
 });
 
+router.get("/" , async (req, res, next) => {
+  try{
+     if(!req.headers["authorization"]){
+                return res.sendStatus(401);
+            }
+            const Authorization = req.headers["authorization"].split(" ")[1];
+            await axios
+                .get(`http://node_auth:3000/auth/validate`, {
+                    headers: { Authorization: `Bearer ${Authorization}` },
+                })
+    const users = await axios.get("http://node_auth:3000/auth/");
+    res.json(users.data);
+  }catch(err){
+    if(!err.response){
+      res.sendStatus(500);
+    }else{
+      res.sendStatus(err.response.status);
+    }
+  }
+}); 
+
 router.all("/signup", async (req, res, next) => {
   res.status(405).json({
     type: "error",

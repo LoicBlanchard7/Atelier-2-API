@@ -21,7 +21,7 @@ router.get("/getEvent/:id", async (req, res, next) => {
     if(!error){
         try {
             const events = await knex('Event').where('eid', value.id);
-            res.json({ events });
+            res.json({ "events" : events[0] });
         } catch (error) {
             res.sendStatus(500);
         }
