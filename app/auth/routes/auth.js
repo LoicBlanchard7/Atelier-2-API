@@ -20,14 +20,14 @@ router.get("/", async (req, res, next) => {
 //Methode get pour récupérer un utilisateur par son id
 router.get("/userId/:id", async (req, res, next) => {
   const schema = Joi.object({
-    uid: Joi.string().required(),
+    id: Joi.string().required(),
   });
 
   const { error, value } = schema.validate(req.params);
 
   try {
     const users = await knex("Account");
-    let user = users.find((element) => element.uid == value.uid);
+    let user = users.find((element) => element.uid == value.id);
     res.json({ user });
   } catch (error) {
     res.sendStatus(500);

@@ -62,7 +62,7 @@ router.get("/user/:uid", async (req, res, next) => {
                 const event = await knex("Event").where({ eid: participants[i].eid });
                 let eventObj = {
                     "event" : event[0],
-                    "status": participants[i].status
+                    "status": participants[i].status,
                 }
                 events.push(eventObj);
             }

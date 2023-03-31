@@ -25,7 +25,26 @@ router.get("/user/:id", async (req, res, next) => {
 
             let link = "http://node_event:3000" + req.originalUrl;
             const response = await axios.get(link)
-            res.json(response.data);
+
+            let resTab = []
+
+            if( response.data.events.length == 0){
+                res.json(resTab);
+            }
+            for(let i = 0; i < response.data.events.length; i++){
+                let event = response.data.events[i].event;
+                console.log(event);
+                let creator = await axios.get("http://node_auth:3000/auth/userId/" + event.uid);
+                console.log(response.data.events[i].status);
+
+                resTab.push({
+                    event : event,
+                    status : response.data.events[i].status,
+                    creator : creator.data.user.name + " " + creator.data.user.firstname
+                })
+            }
+            console.log("ici");
+            res.json(resTab);
         }
         catch (error) {
              if(!error.response){

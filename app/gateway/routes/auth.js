@@ -66,6 +66,19 @@ router.post("/signin", async (req, res, next) => {
   }
 });
 
+router.get("/userId/:id",async (req, res, next) =>{
+  try{
+    const user = await axios.get("http://node_auth:3000/auth/userId/"+req.params.id);
+    res.json(user.data);
+  }catch(err){
+    if(!err.response){
+      res.sendStatus(500);
+    }else{
+      res.sendStatus(err.response.status);
+    }
+  }
+});
+
 router.all("/signup", async (req, res, next) => {
   res.status(405).json({
     type: "error",
