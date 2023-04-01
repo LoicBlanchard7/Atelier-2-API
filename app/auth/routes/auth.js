@@ -32,7 +32,7 @@ router.get("/userId/:id", async (req, res, next) => {
   } catch (error) {
     res.sendStatus(500);
   }
-}); 
+});
 // Méthode POST pour créer un utilisateur
 router.post("/signup", async (req, res, next) => {
   // On vérifie que le body contient bien un nom, un email et un mot de passe
@@ -52,7 +52,7 @@ router.post("/signup", async (req, res, next) => {
       const user = await knex("Account").where("email", value.email).first();
       // Si l'utilisateur n'existe pas, on le crée
       if (!user) {
-        let uid = uuidv4()
+        let uid = uuidv4();
         await knex
           .insert({
             uid: uid,
@@ -61,10 +61,10 @@ router.post("/signup", async (req, res, next) => {
             email: value.email,
             password: await bcrypt.hash(value.password, 10),
             created_at: new Date(),
-            updated_at: new Date()
+            updated_at: new Date(),
           })
           .into("Account");
-        
+
         // On retourne un message de succès
         res.status(201).json({
           type: "success",
@@ -76,6 +76,55 @@ router.post("/signup", async (req, res, next) => {
           type: "error",
           error: 409,
           message: "Cet utilisateur existe déjà",
+        });
+      }
+    } catch (err) {
+      // Si une erreur est survenue lors de l'execution, on renvoie une erreur 500
+      res.sendStatus(500);
+    }
+  } else {
+    // Si une erreur de validation du body est survenue, on renvoie une erreur 400
+    res.sendStatus(400);
+  }
+});
+
+//Methode put qui permet de modifier le nom et le prénom d'un utilisateur
+router.put("/updateUser", async (req, res, next) => {
+  const schema = Joi.object({
+    uid: Joi.string().required(),
+    name: Joi.string().min(1).max(50).required(),
+    firstname: Joi.string().min(1).max(50).required(),
+  });
+  
+  const { error, value } = schema.validate(req.body);
+  // Si aucune erreur de validation du body, on continue
+  if (!error) {
+    try {
+      // On vérifie que l'utilisateur existe déjà
+      const user = await knex("Account").where("uid", value.uid).first();
+
+      if (user) {
+
+        await knex("Account")
+          .where("uid", value.uid)
+          .update({
+            name: value.name,
+            firstname: value.firstname,
+            updated_at: new Date(),
+          });
+
+        // On retourne un message de succès
+        res.status(201).json({
+          type: "success",
+          message: "Utilisateur modifié",
+        });
+
+      } else {
+        // Si l'utilisateur n'existe pas, on renvoie une erreur 409
+        res.status(409).json({
+          type: "error",
+          error: 409,
+          message: "Cet utilisateur n'existe pas",
         });
       }
     } catch (err) {
@@ -104,21 +153,20 @@ router.post("/signin", async (req, res, next) => {
       const user = await knex("Account").where("email", value.email).first();
       // On vérifie que l'utilisateur existe
       if (user) {
-    // On compare le mot de passe entré avec le mot de passe hashé
+        // On compare le mot de passe entré avec le mot de passe hashé
         const validPassword = await bcrypt.compare(
           value.password,
           user.password
         );
 
-      
         // Si le mot de passe est correct
         if (validPassword) {
           // On génère les tokens
           const tokens = await generateTokens(user.uid);
           // On retourne les tokens
-       
+
           res.status(200).json({
-            uid: user.uid, 
+            uid: user.uid,
             access_token: tokens.access_token,
             refresh_token: tokens.refresh_token,
           });
@@ -255,7 +303,6 @@ router.all("/", async (req, res, next) => {
   });
 });
 
-
 // Vérifie que l'access token est valide
 function verifyToken(bearer) {
   // On vérifie que le token est présent dans le header
@@ -294,7 +341,6 @@ async function generateTokens(uid) {
   await knex("Account").where("uid", uid).update({
     refresh_token: refreshToken,
   });
-
 
   // Retourne les tokens
   return {

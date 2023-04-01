@@ -79,6 +79,35 @@ router.get("/userId/:id",async (req, res, next) =>{
   }
 });
 
+router.put("/updateUser", async (req, res, next) => {
+  const schema = Joi.object({
+    uid: Joi.string().required(),
+    firstname: Joi.string().min(1).max(50).required(),
+    name: Joi.string().min(1).max(50).required(),
+  });
+  const { error, value } = schema.validate(req.body);
+
+  if (!error) {
+    try {
+      const user = await axios.put("http://node_auth:3000/auth/updateUser", {
+        uid : value.uid,
+        name: value.name,
+        firstname: value.firstname,
+      });
+
+      res.json(user.data);
+    } catch (err) {
+       if(!err.response){
+          res.sendStatus(500);
+        }else{
+            res.sendStatus(err.response.status);
+        }
+    }
+  } else {
+    res.sendStatus(400);
+  }
+});
+
 router.get("/" , async (req, res, next) => {
   try{
      if(!req.headers["authorization"]){
