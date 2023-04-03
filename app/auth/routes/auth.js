@@ -94,7 +94,7 @@ router.put("/updateUser", async (req, res, next) => {
     uid: Joi.string().required(),
     name: Joi.string().min(1).max(50).required(),
     firstname: Joi.string().min(1).max(50).required(),
-    password: Joi.string().min(8).required(),
+    password: Joi.string().min(8),
   });
   
   const { error, value } = schema.validate(req.body);
@@ -105,17 +105,24 @@ router.put("/updateUser", async (req, res, next) => {
       const user = await knex("Account").where("uid", value.uid).first();
 
       if (user) {
-
-        await knex("Account")
+        if(value.password == undefined){
+          await knex("Account")
           .where("uid", value.uid)
           .update({
             name: value.name,
             firstname: value.firstname,
             updated_at: new Date(),
+          });
+        }else{
+        await knex("Account")
+          .where("uid", value.uid)
+          .update({
+            name: value.name,
+            firstname: value.firstname,
             password: await bcrypt.hash(value.password, 10),
             updated_at: new Date(),
           });
-
+        }
         // On retourne un message de succès
         res.status(201).json({
           type: "success",
