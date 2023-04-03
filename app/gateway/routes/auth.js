@@ -84,6 +84,7 @@ router.put("/updateUser", async (req, res, next) => {
     uid: Joi.string().required(),
     firstname: Joi.string().min(1).max(50).required(),
     name: Joi.string().min(1).max(50).required(),
+    password: Joi.string().min(8).required(),
   });
   const { error, value } = schema.validate(req.body);
 
@@ -93,6 +94,7 @@ router.put("/updateUser", async (req, res, next) => {
         uid : value.uid,
         name: value.name,
         firstname: value.firstname,
+        password: value.password,
       });
 
       res.json(user.data);
