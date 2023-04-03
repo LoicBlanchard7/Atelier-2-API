@@ -70,15 +70,6 @@ router.get("/event/:id", async (req, res, next) => {
     
         if(!error){
             try {
-                if(!req.headers["authorization"]){
-                    return res.sendStatus(401);
-                }
-                const Authorization = req.headers["authorization"].split(" ")[1];
-                await axios
-                    .get(`http://node_auth:3000/auth/validate`, {
-                        headers: { Authorization: `Bearer ${Authorization}` },
-                    })
-    
                 let link = "http://node_event:3000" + req.originalUrl;
                 const response = await axios.get(link)
                 res.json(response.data);
@@ -96,6 +87,32 @@ router.get("/event/:id", async (req, res, next) => {
     }  
 );
 
+router.get("/getParticipant/:uid", async (req, res, next) => {
+    const schema = Joi.object({
+        uid: Joi.string().required(),
+    });
+
+    const { error, value } = schema.validate(req.params);
+
+    if(!error){
+        try {
+            let link = "http://node_event:3000" + req.originalUrl;
+            const response = await axios.get(link)
+            res.json(response.data);
+        }
+        catch (error) {
+            if(!error.response){
+                res.sendStatus(500);
+            }else{
+                res.sendStatus(error.response.status);
+            }
+        }
+    }else{
+        res.sendStatus(400);
+    }
+
+});
+
 router.post("/add", async (req, res, next) => {
     const schema = Joi.object({
         uid: Joi.string().required(),
@@ -108,15 +125,6 @@ router.post("/add", async (req, res, next) => {
 
         if(!error){
             try {
-                if(!req.headers["authorization"]){
-                    return res.sendStatus(401);
-                }
-                const Authorization = req.headers["authorization"].split(" ")[1];
-                await axios
-                    .get(`http://node_auth:3000/auth/validate`, {
-                        headers: { Authorization: `Bearer ${Authorization}` },
-                    })
-
                 let link = "http://node_event:3000" + req.originalUrl;
                 const response = await axios.post(link ,{ uid: value.uid, eid: value.eid, name: value.name, firstname: value.firstname})
                 res.json(response.data);
@@ -145,15 +153,6 @@ router.put("/accept", async (req, res, next) => {
 
     if(!error){
         try {
-            if(!req.headers["authorization"]){
-                return res.sendStatus(401);
-            }
-            const Authorization = req.headers["authorization"].split(" ")[1];
-            await axios
-                .get(`http://node_auth:3000/auth/validate`, {
-                    headers: { Authorization: `Bearer ${Authorization}` },
-                })
-
             let link = "http://node_event:3000" + req.originalUrl;
 
             const response = await axios.put(link ,{ uid: value.uid, eid: value.eid, status: value.status})
@@ -202,7 +201,7 @@ router.post("/comment/add", async (req, res, next) => {
     }
 });
 
-router.get("/comment/:eid", async (req, res, next) => {
+router.get("/comment/getComment/:eid", async (req, res, next) => {
     const schema = Joi.object({
         eid: Joi.string().required(),
     });

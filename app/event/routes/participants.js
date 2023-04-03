@@ -19,6 +19,32 @@ router.get("/", async (req, res, next) => {
     }
 });
 
+
+//Route qui récupère les informations d'un participant
+router.get("/getParticipant/:uid", async (req, res, next) => {
+    const schema = Joi.object({
+        uid: Joi.string().required(),
+    });
+
+    const { error , value } = schema.validate(req.params);
+
+    if(!error){
+    try {
+        const participants = await knex("Participant").where({ uid: value.uid });
+        if (!participants) {
+        res.status(404).json({ code: 404, message: error });
+        } else {
+        res.json({ participants });
+        }
+    } catch (error) {
+        res.status(500).json({ code: 500, message: error });
+    }
+    }else{
+        res.status(400).json({ code: 400, message: error });
+    }
+
+});
+
 //Route pour récupérer tous les participants d'un événement
 router.get("/event/:eid", async (req, res, next) => {
 
@@ -149,7 +175,7 @@ router.post("/comment/add", async (req, res, next) => {
     }
 }); 
 
-router.get("/comment/:eid", async (req, res, next) => {
+router.get("/comment/getComment/:eid", async (req, res, next) => {
     const schema = Joi.object({
         eid: Joi.string().required(),
     });
