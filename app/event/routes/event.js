@@ -66,9 +66,10 @@ router.post("/createEvent", async (req, res, next) => {
 
   if (!error) {
     try {
+      let neweid = uuidv4();
       await knex
         .insert({
-          eid: uuidv4(),
+          eid: neweid,
           Title: value.title,
           description: value.description,
           date: new Date(value.date),
@@ -83,6 +84,7 @@ router.post("/createEvent", async (req, res, next) => {
         type: "success",
         error: null,
         message: "Evènement créé",
+        eid: neweid
       });
     } catch (err) {
       // Si une erreur est survenue lors de l'execution, on renvoie une erreur 500
